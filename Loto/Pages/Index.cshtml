@@ -1,0 +1,256 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+<div id="main-navtab">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="bot-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Với máy</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="human-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Với người</a>
+        </li>
+
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="bot-tab">
+            <div id="info">
+                <div id="infor-main">
+                    <div class="mrow">
+                        <div class="mcol-1">
+                            <label for="username">Tên người chơi</label>
+                        </div>
+                        <div class="mcol-2"><input type="text" id="username1" autocomplete="off"></div>
+
+                    </div>
+                    <div class="mrow">
+                        <div class="mcol-1">
+                            <label for="lv-select">Độ khó</label>
+                        </div>
+                        <div class="mcol-2">
+                            <select name="lv-select" id="lv-select">
+                                <option value="1">Dễ</option>
+                                <option value="2">Khó</option>
+                                <option value="3">Khó vcl</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="btnBotIngame" class="btnIngame">Vào Game</button>
+                </div>
+
+            </div>
+        </div>
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="human-tab">
+            <div id="info">
+                <div id="infor-main">
+                    <div class="mrow">
+                        <div class="mcol-1">
+                            <label for="username">Tên người chơi</label>
+                        </div>
+                        <div class="mcol-2"><input type="text" id="username2" autocomplete="off"></div>
+
+                    </div>
+                    <div class="mrow">
+                        <div class="mcol-1">
+                            <label for="username">Phòng</label>
+                        </div>
+                        <div class="mcol-2"><input type="text" id="roomid" autocomplete="off"></div>
+                    </div>
+                    <div class="mrow"><i id="messageHub"></i></div>
+                    </div>
+                    <button id="btnHumanIngame" class="btnIngame">Vào Game</button>
+                </div>
+        </div>
+    </div>
+</div>
+<div class="my-contaner">
+    <div id="human-view" >
+        @await Html.PartialAsync("_HumanImports")
+    </div>
+    
+</div>
+
+
+@section Scripts{
+    <script>
+
+        var botLv, botUname;
+
+        $(function () {
+
+            var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+            resgisterClientMethod(connection);
+
+            connection.start().then(function () {
+                console.log('Bắt đầu request');
+                registerEvent(connection);
+
+            }).catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            setScreen(2, false);
+            buttonStartOff();
+        })
+
+     
+
+        function setScreen(type, isLogin) {
+            switch (type) {
+                case 1:
+
+                    break;
+                case 2:
+                    if (isLogin) {
+                        $('#human-view').show();
+                        $('#main-navtab').hide();
+                    } else {
+                        $('#human-view').hide();
+                        $('#main-navtab').show();
+                    }
+                    break;
+            }
+        }
+
+
+        function registerEvent(conn) {
+
+            $('#btnHumanIngame').click(function () {
+
+                var username = document.getElementById('username2').value;
+                var roomid = document.getElementById('roomid').value;
+
+                if (username === '' && roomid === '') {
+                    return false;
+                }
+
+                conn.invoke("UserConnected", username, roomid).catch(function (err) {
+                    return console.error(err.toString());
+                });
+
+            });
+
+            $('#btnBotIngame').click(function () {
+
+                //var uname = $('#username1').val();
+                //var lv = $('#lv-select').val();
+
+                //if (uname === '' || lv === '') {
+                //    return false;
+                //}
+
+                //botLv = lv; botUname = uname;
+                //$('#main-navtab').hide();
+                //$('.my-contaner').load('/Index?handler=PartialBot');
+            });
+
+            //user pick number
+            $('#human-view #tb-user-1').on('click', '.td-pick', function (e) {
+                e.preventDefault();
+
+                $(this).parent().addClass('td-active');
+                var value = $(this).attr('data-type');
+                conn.invoke("UserPickNumber", value).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            })
+        }
+
+        function resgisterClientMethod(conn) {
+
+            conn.on('onUserCreateRoom', function (roomId, user) {
+                $('#human-view #tb-user-1 caption').html(user.userName);
+                $('#human-view #div-user-1 .money span').html(formatNumber(user.money));
+                $('#human-view #tb-user-1 tbody').html(user.tableHtml);
+                $('#human-view #tb-user-2 caption').html('Đang chờ người chơi');
+                $('#human-view #roomNumber span').html(roomId);
+
+                setScreen(2, true);
+            });
+
+            conn.on('addUserToRoom', function (roomId, user1, user2,isUser2) {
+
+                if (isUser2) {
+
+                    $('#human-view #tb-user-1 caption').html(user1.userName);
+                    $('#human-view #div-user-1 .money span').html(formatNumber(user1.money));
+                    $('#human-view #tb-user-1 tbody').html(user1.tableHtml);
+                    $('#human-view #roomNumber span').html(roomId);
+
+                    $('#human-view #tb-user-2 caption').html(user2.userName);
+                    $('#human-view #div-user-2 .money span').html(formatNumber(user2.money));
+                    $('#human-view #tb-user-2 tbody').html(user2.tableHtml);
+
+                    $('#human-view #btnStart').css('visibility','hidden');
+                    setScreen(2, true);
+                } else {
+                    $('#human-view #tb-user-2 caption').html(user2.userName);
+                    $('#human-view #div-user-2 .money span').html(formatNumber(user2.money));
+                    $('#human-view #tb-user-2 tbody').html(user2.tableHtml);
+                    buttonStartOff(false);
+                }
+
+
+                
+            });
+
+            conn.on('overflowMember', function () {
+                $('#messageHub').html('Phòng chơi đã đầy người.');
+            });
+                
+            conn.on('userNameExists', function () {
+                $('#messageHub').html('Tên người chơi đã tồn tại.');
+            });
+
+            conn.on('roomIdNotExists', function () {
+                $('#messageHub').html('Phòng không tồn tại.');
+            });
+
+            conn.on('onUserOutRoom', function (userName) {
+                $('#human-view #tb-user-2 caption').html('Đang chờ người chơi');
+                $('#human-view #div-user-2 .money span').html('');
+                $('#human-view #tb-user-2 tbody').html('');
+            });
+
+            conn.on('onUserPickNumber', function (number) {
+                $.each($('#human-view #tb-user-2').find('td'), function (key, item) {
+                    if (parseInt($(item).children('a').attr('data-type')) === number) {
+                        $(item).addClass('td-active');
+                        return false;
+                    }
+                })
+            });
+
+            conn.on('onUserWin', function (userW,userL, user2) {
+                if (user2) {
+                    alert('Con mắm ' + userW.userName + ' win ời.');
+                    $('#human-view #div-user-1 .money span').html(formatNumber(userL.money));
+                    $('#human-view #div-user-2 .money span').html(formatNumber(userW.money));
+                }
+                else {
+                    alert('Chúc mừng, win cmn ời.');
+                    $('#human-view #div-user-1 .money span').html(formatNumber(userW.money));
+                    $('#human-view #div-user-2 .money span').html(formatNumber(userL.money));
+                }
+            });
+        }
+
+
+        function buttonStartOff(off = true) {
+            if (off) {
+                $('#human-view #btnStart').attr('disabled', 'disabled');
+            } else {
+                $('#human-view #btnStart').removeAttr('disabled');
+            }
+        }
+
+        function formatNumber(num) {
+            if (num === null) {
+                return '';
+            }
+            return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+        }
+    </script>
+}

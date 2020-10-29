@@ -1,0 +1,215 @@
+﻿
+#main-navtab {
+    width: 500px;
+    padding: 10px;
+    margin: 0 auto 0 auto;
+    margin-top: 100px;
+    border-radius: 10px;
+    box-shadow: 2px 3px 13px 7px #1f1c1c;
+}
+
+    #main-navtab .tab-content {
+        padding: 5px;
+    }
+
+.my-contaner {
+    width: 100%;
+    overflow: hidden;
+    clear: both;
+}
+
+    .my-contaner #human,
+    .my-contaner #bot,
+    .my-contaner #div-user-1, .my-contaner #div-user-2 {
+        float: left;
+        width: 50%;
+    }
+
+    .my-contaner table caption { 
+         caption-side: top;
+         text-align:center;
+    }
+#gameplay {
+    height: 300px;
+}
+
+.row-dot {
+    height: 60px;
+    width: 400px;
+    border: 2px solid red;
+    border-radius: 3px;
+    padding: 5px;
+    line-height: 60px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    margin-top: 20px;
+    background: #efe2e2;
+}
+
+.row-innit {
+    margin-top: 10px;
+    padding: 3px;
+    border: 1px solid red;
+    border-radius: 3px;
+    min-height: 30px;
+    position: relative;
+    width: 990px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#btnStart {
+    cursor: pointer;
+    display: block;
+    height: 80px;
+    width: 80px;
+    border-radius: 50%;
+    border: 4px solid red;
+    color: #000;
+    font-size: 30px;
+    font-weight: bold;
+    background: radial-gradient(circle, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
+    margin: 0 auto;
+}
+
+    #btnStart:focus {
+        outline: none;
+    }
+
+    #btnStart:active {
+        font-size: 27px;
+    }
+
+.row-innit .dot {
+    height: 30px;
+    width: 30px;
+    font-size: 15px;
+    line-height: 30px;
+    left: 0;
+    position: relative;
+    margin-top: 3px;
+}
+
+.dot {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    display: inline-block;
+    text-align: center;
+    font-size: 30px;
+    color: #ec002c;
+    line-height: 45px;
+    font-weight: bold;
+    box-shadow: inset #244239 -2px 2px 4px 1px;
+    position: absolute;
+    left: -50px;
+}
+
+.dot-1 {
+    background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(98, 196, 97, 0.6474964985994398) 25%, rgba(103, 201, 221, 1) 86%, rgba(103, 201, 221, 1) 100%);
+}
+
+.dot-2 {
+    background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(100, 217, 23, 0.6474964985994398) 0%, rgba(48, 186, 222, 1) 86%, rgba(103, 201, 221, 1) 100%);
+}
+
+.dot-3 {
+    color: #fff;
+    background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(100, 217, 23, 0.6474964985994398) 35%, rgba(222, 48, 66, 1) 86%, rgba(103, 201, 221, 1) 100%);
+}
+
+table {
+    border: 2px solid red;
+    margin: 0 auto;
+}
+
+    table tr td {
+        height: 50px;
+        width: 30px;
+        border-left: 1px solid #999;
+        border-top: 1px solid #999;
+        text-align: center;
+        cursor: pointer;
+        color: #2755fb;
+    }
+
+        table tr td:first-child {
+            border-left: none;
+        }
+
+    table tr:first-child td {
+        border-top: none;
+    }
+
+.td-active {
+    background-color: #bdd7e6;
+}
+
+#alert {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    left: 40%;
+    top: 35%;
+    display: none;
+}
+
+    #alert span {
+        width: 320px;
+        height: 200px;
+        background: #2ef5e2;
+        position: absolute;
+        text-align: center;
+        line-height: 200px;
+        font-size: 85px;
+        opacity: 0.7;
+        border-radius: 10px;
+        color: #ff1212;
+        border: 1px solid #000;
+        box-shadow: #000 4px 8px 11px 4px;
+    }
+
+
+#infor-main label,
+#infor-main #username,
+#infor-main #lv-select {
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+#infor-main .mrow {
+    margin-top: 10px;
+}
+
+#infor-main input,
+#infor-main select {
+    width: 100%;
+    height: 30px;
+    padding: 0 3px 0 3px;
+}
+
+.btnIngame {
+    width: 100%;
+    margin-top: 15px;
+    font-size: 20px;
+    background: #c6dbfb;
+    border: 1px solid;
+    height: 30px;
+    border-radius: 3px;
+}
+
+.my-contaner #bot .money,
+.my-contaner #div-user-1 .money {
+    float: left;
+}
+
+.my-contaner #human .money, .my-contaner #div-user-2 .money {
+    float: right;
+}
+#messageHub{
+    color: red;
+}
+a.td-pick:hover{
+    text-decoration:none;
+}

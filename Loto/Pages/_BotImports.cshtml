@@ -1,0 +1,333 @@
+﻿<div id="gameplay">
+    <button id="btnStart">Play</button>
+    <div class="row-dot">
+    </div>
+    <div class="row-innit"></div>
+</div>
+<hr>
+<div id="bot">
+    <div class="money"><img src="https://www.flaticon.com/svg/static/icons/svg/2916/2916103.svg" alt="" width="15">&nbsp;<span></span></div>
+
+    <table class="table" id="bot-table" disabled>
+        <caption>Máy</caption>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<div id="human">
+    <div class="money"><img src="https://www.flaticon.com/svg/static/icons/svg/2916/2916103.svg" alt="" width="15">&nbsp;<span></span></div>
+    <table class="table" id="my-table">
+        <caption>Bạn</caption>
+        <tbody>
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+    var isOn = false;
+    var arrCreatedNumber = [];
+    var timeout;
+    const lengthSuccess = 5;
+    var showNumberInt;
+
+    const createNumber = function () {
+        var nums = [];
+        for (var i = 1; i <= 99; i++) {
+            nums.push(i);
+        }
+        return shuffle(nums);
+    }
+
+    var arrayNumber = createNumber();
+
+    var ObjectInGame = {
+        money: 100000,
+        stake: 50000,
+        getMoney: function () {
+            return this.money;
+        },
+        setMoney: function (money) {
+            this.money = money;
+        },
+        getStake: function () {
+            return this.stake;
+        },
+        setStake: function (money) {
+            this.stake = money;
+        }
+    }
+    var Bot = {
+        __proto__: ObjectInGame
+    }
+    var Human = {
+        name: 'Unknow',
+        getName: function () {
+            return this.name;
+        },
+        setName: function (name) {
+            this.name = name;
+        },
+        __proto__: ObjectInGame
+    }
+
+
+    onApplicationStart(botLv, botUname);
+
+    
+
+    function onApplicationStart(hard, uname) {
+        if (hard === '' || uname === '') return false;
+        switch (parseInt(hard)) {
+            case 1:
+                timeout = 3000;
+                break;
+            case 2:
+                timeout = 2000;
+                break;
+            case 3:
+                timeout = 1000;
+                break;
+            default:
+                timeout = 3000;
+                break;
+        }
+
+        $('#my-table caption').text(function () {
+            Human.setName(uname);
+            username = ('Đũy ').concat(Human.getName());
+            return username;
+        });
+
+        updateMoney();
+    }
+
+    function updateMoney() {
+        $('#bot .money span').text(formatNumber(Bot.getMoney()) + " đồng");
+        $('#human .money span').text(formatNumber(Human.getMoney()) + " đồng");
+    }
+
+    function moneyResult(botWin, fn) {
+        if (botWin) {
+            Bot.setMoney(Bot.getMoney() + Bot.getStake());
+            Human.setMoney(Human.getMoney() - Human.getStake());
+        } else {
+            Bot.setMoney(Bot.getMoney() - Bot.getStake());
+            Human.setMoney(Human.getMoney() + Human.getStake());
+        }
+        fn();
+    }
+
+
+    function Run() {
+
+        var leftRow = $('.row-dot').position().left;
+        var rightRow = leftRow + $('.row-dot').width();
+        var y = 0;
+
+        showNumberInt = setInterval(() => {
+            var value = arrayNumber[y++];
+            var elem = createElement(value);
+            $('.row-dot').html(elem);
+            arrCreatedNumber.push(value);
+
+            elem.animate({
+                left: rightRow
+            }, timeout, function () {
+                addToRowInit(value, function (value) {
+                    var botWin = botAutoSelect('#bot-table', value);
+                    if (botWin) {
+                        clearGame(function () {
+                            $('#alert span').text('You lose');
+                            $('#alert').fadeIn(200).delay(2000).fadeOut(200);
+                            moneyResult(true, updateMoney);
+
+                        })
+                    }
+                });
+
+            });
+            if (y == arrayNumber.length) {
+                clearGame();
+            };
+        }, timeout);
+    }
+
+    function clearGame(fn = null) {
+        clearInterval(showNumberInt);
+        isOn = false;
+        fn();
+    }
+
+    function addToRowInit(value, fn) {
+        $('.row-innit').append(createElement(value));
+        fn(value);
+    }
+
+    function createTable(isbot = false) {
+        var arr = [];
+
+        //1-9
+        var arr1 = shuffle(arrayNumber.filter(num => num < 10));
+        //10-19
+        var arr2 = shuffle(arrayNumber.filter(num => num >= 10 && num <= 19));
+        //20-29
+        var arr3 = shuffle(arrayNumber.filter(num => num >= 20 && num <= 29));
+        //30-39
+        var arr4 = shuffle(arrayNumber.filter(num => num >= 30 && num <= 39));
+        //40-49
+        var arr5 = shuffle(arrayNumber.filter(num => num >= 40 && num <= 49));
+        //50-59
+        var arr6 = shuffle(arrayNumber.filter(num => num >= 50 && num <= 59));
+        //60-69
+        var arr7 = shuffle(arrayNumber.filter(num => num >= 60 && num <= 69));
+        //70-79
+        var arr8 = shuffle(arrayNumber.filter(num => num >= 70 && num <= 79));
+        //80-89
+        var arr9 = shuffle(arrayNumber.filter(num => num >= 80 && num <= 89));
+        //90-99
+        var arr10 = shuffle(arrayNumber.filter(num => num >= 90 && num <= 99));
+
+        // var number = Math.floor(Math.random() * Math.floor(arrayNumber.length));
+        for (var i = 0; i < 5; i++) {
+
+            arr.push([arr1[i], arr2[i], arr3[i], arr4[i], arr5[i], arr6[i], arr7[i], arr8[i], arr9[i], arr10[i]]);
+        }
+
+        if (isbot) {
+            var html = '';
+            for (var i = 0; i < 5; i++) {
+
+                //tạo lỗ trống
+                var arrHole = getArrEmpty(arr[i]);
+                //end
+                html += '<tr>';
+                for (var j = 0; j <= 9; j++) {
+                    if (arrHole.includes(arr[i][j])) html += '<td></td>';
+                    else {
+                        html += '<td data-type="' + arr[i][j] + '">' + arr[i][j] + '</td>';
+                    }
+
+                }
+                html += '</tr>';
+            }
+        } else {
+            var html = '';
+            var fnClick = 'userSelected';
+            for (var i = 0; i < 5; i++) {
+                //tạo lỗ trống
+                var arrHole = getArrEmpty(arr[i]);
+                //end
+                html += '<tr>';
+                for (var j = 0; j <= 9; j++) {
+                    if (arrHole.includes(arr[i][j])) html += '<td></td>';
+                    else html += '<td onclick="' + fnClick + '(this,' + arr[i][j] + ')">' + arr[i][j] + '</td>';
+                }
+                html += '</tr>';
+            }
+        }
+
+        return html;
+
+    }
+
+    function getArrEmpty(arr) {
+        var arrHole = [];
+        var _arr = Array.from(arr);
+        while (arrHole.length < lengthSuccess) {
+            var y = Math.floor(Math.random() * Math.floor(_arr.length));
+            arrHole.push(_arr[y]);
+            _arr.splice(y, 1);
+        }
+        return arrHole;
+    }
+
+    function shuffle(a) {
+        var j, x, i;
+        for (i = a.length - 1; i > 0; i--) {
+            j = Math.floor(Math.random() * (i + 1));
+            x = a[i];
+            a[i] = a[j];
+            a[j] = x;
+        }
+        return a;
+    }
+
+    function formatNumber(num) {
+        if (num === null) {
+            return '';
+        }
+        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+    }
+
+    function createElement(value) {
+        var elem = '<span class="dot  ' + getBackground(value) + '">' + value + '</span>';
+        return $(elem);
+    }
+
+    function getBackground(value) {
+        return 'dot-2';
+    }
+
+    function userSelected(td, value) {
+        if (arrCreatedNumber.length && isOn) {
+            if (arrCreatedNumber.includes(value)) {
+                setActive(td, function (td) {
+                    if (checkWin(td)) {
+                        clearGame(function () {
+                            $('#alert span').text('You win');
+                            $('#alert').fadeIn(200).delay(2000).fadeOut(200);
+                            moneyResult(false, updateMoney);
+
+                        })
+                    }
+                });
+            }
+        }
+    }
+
+    function setActive(td, fn) {
+        $(td).addClass('td-active');
+        fn(td);
+    }
+
+    function checkWin(td) {
+        var tr = $(td).parent();
+
+        if (tr.children('td.td-active').length === lengthSuccess) {
+            return true;
+        }
+        return false;
+
+    }
+
+    function botAutoSelect(table, value) {
+        var object = $(table);
+        var a = object.find('tr');
+        var botWin = false;
+        $.each(object.find('tr'), function (key, tr) {
+            var b = $(tr).find('td');
+            $.each($(tr).find('td'), function (_key, td) {
+                if (parseInt($(td).attr('data-type')) === parseInt(value)) {
+                    setActive(td, function (td) {
+                        if (checkWin(td)) botWin = true;
+                    })
+                    return false;
+                }
+            })
+        });
+        return botWin;
+    }
+
+    $('#btnStart').click(function () {
+        if (!isOn && (Human.getMoney() >= 50000 && Bot.getMoney() >= 50000)) {
+            isOn = true;
+            $('#my-table tbody').html(createTable());
+            $('#bot-table tbody').html(createTable(true));
+            $('.row-innit').html('');
+
+            Run();
+        }
+    });
+</script>
