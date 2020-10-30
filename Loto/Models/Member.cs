@@ -10,7 +10,7 @@ namespace Loto.Models
         public string  UserName { get; set; }
         public string RoomId { get; set; }
         public decimal Money { get; set; }
-        public List<UserDefinedTableNumber> ListCheckingBingo { get; private set; }
+        public List<UserDefinedTableNumber> ListCheckingBingo { get; set; }
         public string TableHtml { get; set; }
 
         public Member()

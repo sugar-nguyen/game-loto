@@ -80,12 +80,49 @@ namespace Loto.Hubs
                 if (isWin)
                 {
                     UpdateTienCuoc(member, firstObj);
+                    room.CountOfTimePlay += 1; // tăng số lần lần chơi
                     await Clients.Caller.onUserWin(member, firstObj);
-                    await Clients.Client(firstObj.UserId).onUserWin(member, firstObj, true);
+                    await Clients.Client(firstObj.UserId).onUserWin(firstObj, member, true);
                 }
             }
         }
 
+        public async Task PlayGame()
+        {
+            var member = GetClientCaller();
+            var room = GetRoomCaller(member.RoomId);
+            var otherMeber = room.Members.Last();
+            if (otherMeber.UserId == member.UserId) otherMeber = room.Members.First();
+            if (room.CountOfTimePlay > 1)
+            {
+                ResetMember(room);
+                await Clients.Caller.onUserPlayNewGame(member, otherMeber);
+                await Clients.Client(otherMeber.UserId).onUserPlayNewGame(otherMeber, member);
+            }
+            await Clients.Group(member.RoomId).onUserPlayGame(room.Shuffule);
+
+        }
+        public async Task UserRePlayGame()
+        {
+            var member = GetClientCaller();
+            var room = GetRoomCaller(member.RoomId); var otherMeber = room.Members.Last();
+            if (otherMeber.UserId == member.UserId) otherMeber = room.Members.First();
+            room.CountOfTimePlay += 1;
+            ResetMember(room);
+            await Clients.Caller.onUserPlayNewGame(member, otherMeber);
+            await Clients.Client(otherMeber.UserId).onUserPlayNewGame(otherMeber, member);
+            await Clients.Group(member.RoomId).onUserPlayGame(room.Shuffule);
+        }
+        public void ResetMember(Room room)
+        {
+            room.Shuffule = NumberProcess.CreateArrayGameNumber();
+            List<UserDefinedTableNumber> tmp;
+            foreach (var member in room.Members)
+            {
+                member.TableHtml = NumberProcess.UserDefinedTableNumber(out tmp);
+                member.ListCheckingBingo = tmp;
+            }
+        }
         private bool PickNumberAndCheckWin(Member member, int number)
         {
             foreach (var item in member.ListCheckingBingo)
@@ -121,8 +158,12 @@ namespace Loto.Hubs
             foreach (var room in _Rooms)
             {
                 var member = room.Members.SingleOrDefault(x => x.UserId == id);
+
                 if (member != null)
                 {
+                    var memberInRoom = room.Members.First();
+                    if (memberInRoom.UserId == member.UserId) memberInRoom = room.Members.Last();
+                    memberInRoom.ListCheckingBingo.ForEach(x => x.ls.ForEach(y => y.Pick = false));
                     room.Members.Remove(member);
                     if (room.Members.Count == 0)
                     {

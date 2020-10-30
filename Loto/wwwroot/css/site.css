@@ -7,7 +7,9 @@
     border-radius: 10px;
     box-shadow: 2px 3px 13px 7px #1f1c1c;
 }
-
+    #main-navtab ul#myTab li {
+       font-weight:bold;
+    }
     #main-navtab .tab-content {
         padding: 5px;
     }
@@ -25,10 +27,11 @@
         width: 50%;
     }
 
-    .my-contaner table caption { 
-         caption-side: top;
-         text-align:center;
+    .my-contaner table caption {
+        caption-side: top;
+        text-align: center;
     }
+
 #gameplay {
     height: 300px;
 }
@@ -36,27 +39,28 @@
 .row-dot {
     height: 60px;
     width: 400px;
-    border: 2px solid red;
-    border-radius: 3px;
+    border: 2px solid #0756b7;
+    border-radius: 5px;
     padding: 5px;
     line-height: 60px;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
     margin-top: 20px;
-    background: #efe2e2;
+    background: linear-gradient(to right, rgba(212,228,239,1) 0%, rgba(134,174,204,1) 100%);
 }
 
 .row-innit {
     margin-top: 10px;
     padding: 3px;
-    border: 1px solid red;
+    border: 1px solid #0756b7;
     border-radius: 3px;
     min-height: 30px;
     position: relative;
     width: 990px;
     margin-left: auto;
     margin-right: auto;
+    background: linear-gradient(to right, rgba(212,228,239,1) 0%, rgba(134,174,204,1) 100%);
 }
 
 #btnStart {
@@ -65,11 +69,11 @@
     height: 80px;
     width: 80px;
     border-radius: 50%;
-    border: 4px solid red;
-    color: #000;
+    border: 1px solid #000;
+    color: #fff;
     font-size: 30px;
     font-weight: bold;
-    background: radial-gradient(circle, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
+    background: linear-gradient(to right, rgba(76,76,76,1) 0%, rgba(89,89,89,1) 12%, rgba(102,102,102,1) 25%, rgba(71,71,71,1) 39%, rgba(44,44,44,1) 50%, rgba(0,0,0,1) 51%, rgba(17,17,17,1) 60%, rgba(43,43,43,1) 76%, rgba(28,28,28,1) 91%, rgba(19,19,19,1) 100%);
     margin: 0 auto;
 }
 
@@ -98,7 +102,7 @@
     display: inline-block;
     text-align: center;
     font-size: 30px;
-    color: #ec002c;
+    color: #000;
     line-height: 45px;
     font-weight: bold;
     box-shadow: inset #244239 -2px 2px 4px 1px;
@@ -120,18 +124,24 @@
 }
 
 table {
-    border: 2px solid red;
+    border: 2px solid #0c0101;
     margin: 0 auto;
+    border-radius: 15px;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
 }
 
     table tr td {
         height: 50px;
-        width: 30px;
+        width: 40px;
         border-left: 1px solid #999;
         border-top: 1px solid #999;
         text-align: center;
         cursor: pointer;
         color: #2755fb;
+        background: linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+        position:relative;
     }
 
         table tr td:first-child {
@@ -142,9 +152,16 @@ table {
         border-top: none;
     }
 
-.td-active {
-    background-color: #bdd7e6;
-}
+    table tr td img.pick-icon {
+        height: 30px;
+        position: absolute;
+        left: 10%;
+        top: 18%;
+    }
+
+/*.td-active {
+    background: #bdd7e6 !important;
+}*/
 
 #alert {
     width: 100%;
@@ -176,6 +193,7 @@ table {
 #infor-main #lv-select {
     font-size: 14px;
     box-sizing: border-box;
+    font-weight:bold;
 }
 
 #infor-main .mrow {
@@ -194,22 +212,64 @@ table {
     margin-top: 15px;
     font-size: 20px;
     background: #c6dbfb;
-    border: 1px solid;
+    border: none;
+    padding:0;
     height: 30px;
     border-radius: 3px;
+    font-weight:bold;
 }
 
 .my-contaner #bot .money,
-.my-contaner #div-user-1 .money {
+.my-contaner #div-user-1 .user-info {
     float: left;
 }
 
-.my-contaner #human .money, .my-contaner #div-user-2 .money {
+.my-contaner #human .money, .my-contaner #div-user-2 .user-info {
     float: right;
 }
-#messageHub{
+
+.user-info .user-icon, .user-info .money {
+    display: inline-block;
+}
+
+    .user-info .user-icon .user-info-name,
+    .user-info .money .money-number {
+        font-size: 14px;
+        font-weight: bold;
+        vertical-align: bottom;
+    }
+
+    .user-info .user-icon .user-info-name {
+        color: #2533da;
+    }
+
+.user-info .money {
+    margin-left: 5px;
+}
+
+    .user-info .money .money-number {
+        color: #2a6123;
+    }
+
+#messageHub {
     color: red;
 }
-a.td-pick:hover{
-    text-decoration:none;
+
+a.td-pick {
+    color: #7f10f9;
+    font-weight: bold;
+    font-size: 17px;
+}
+
+    a.td-pick:hover {
+        text-decoration: none;
+    }
+
+#roomNumber #roomid {
+    font-size: 15px;
+    font-weight: bold;
+    vertical-align: bottom;
+}
+.messagebox .messagebox_content .box-msg{
+    margin-left: 5px;
 }

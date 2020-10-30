@@ -27,7 +27,10 @@ namespace Loto.Pages
             return new PartialViewResult { ViewName = "_HumanImports" };
         }
 
-      
+        public IActionResult OnGetShuffleNumber()
+        {
+            return new JsonResult(NumberProcess.CreateArrayGameNumber());
+        }
 
         public void OnGet()
         {

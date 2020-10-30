@@ -58,24 +58,32 @@
                         <div class="mcol-2"><input type="text" id="roomid" autocomplete="off"></div>
                     </div>
                     <div class="mrow"><i id="messageHub"></i></div>
-                    </div>
-                    <button id="btnHumanIngame" class="btnIngame">Vào Game</button>
                 </div>
+                <button id="btnHumanIngame" class="btnIngame">Vào Game</button>
+            </div>
         </div>
     </div>
 </div>
 <div class="my-contaner">
-    <div id="human-view" >
+    <div id="human-view">
         @await Html.PartialAsync("_HumanImports")
     </div>
-    
+
 </div>
 
 
 @section Scripts{
     <script>
 
-        var botLv, botUname;
+        var botLv, botUname, showNumberInterval;
+
+        const pickIcon = '<img class="pick-icon" src="https://www.flaticon.com/svg/static/icons/svg/3601/3601869.svg"/>';
+
+        var GameStatus = {
+            isOn: false,
+            arrayHost: [],
+            timeOut: 3000
+        };
 
         $(function () {
 
@@ -95,7 +103,7 @@
             buttonStartOff();
         })
 
-     
+
 
         function setScreen(type, isLogin) {
             switch (type) {
@@ -124,6 +132,9 @@
 
                 if (username === '' && roomid === '') {
                     return false;
+                } else if (username.length > 15) {
+                    $('#messageHub').html('Tên quá dài.');
+                    return;
                 }
 
                 conn.invoke("UserConnected", username, roomid).catch(function (err) {
@@ -150,56 +161,73 @@
             $('#human-view #tb-user-1').on('click', '.td-pick', function (e) {
                 e.preventDefault();
 
-                $(this).parent().addClass('td-active');
-                var value = $(this).attr('data-type');
-                conn.invoke("UserPickNumber", value).catch(function (err) {
+                if (!GameStatus.isOn) return false;
+
+                var value = parseInt($(this).attr('data-type'));
+
+                if (GameStatus.arrayHost.includes(value)) {
+
+                    $(this).parent().append(pickIcon);
+
+                    conn.invoke("UserPickNumber", value.toString()).catch(function (err) {
+                        return console.error(err.toString());
+                    });
+                }
+            });
+
+            $('#human-view #btnStart').click(function () {
+                conn.invoke("PlayGame").catch(function (err) {
                     return console.error(err.toString());
                 });
-            })
+            });
         }
 
         function resgisterClientMethod(conn) {
 
             conn.on('onUserCreateRoom', function (roomId, user) {
-                $('#human-view #tb-user-1 caption').html(user.userName);
-                $('#human-view #div-user-1 .money span').html(formatNumber(user.money));
+                //  $('#human-view #tb-user-1 caption').html(user.userName);
+                $('#human-view #div-user-1 .user-info .user-info-name').html(user.userName);
+                $('#human-view #div-user-1 .money .money-number').html(formatNumber(user.money));
                 $('#human-view #tb-user-1 tbody').html(user.tableHtml);
-                $('#human-view #tb-user-2 caption').html('Đang chờ người chơi');
-                $('#human-view #roomNumber span').html(roomId);
+                //$('#human-view #tb-user-2 caption').html('Đang chờ người chơi');
+                $('#human-view #div-user-2 .user-info .user-info-name').text('Đang chờ người chơi');
+                $('#human-view #roomNumber #roomid').html(roomId);
 
                 setScreen(2, true);
             });
 
-            conn.on('addUserToRoom', function (roomId, user1, user2,isUser2) {
+            conn.on('addUserToRoom', function (roomId, user1, user2, isUser2) {
 
                 if (isUser2) {
 
-                    $('#human-view #tb-user-1 caption').html(user1.userName);
-                    $('#human-view #div-user-1 .money span').html(formatNumber(user1.money));
+                    //$('#human-view #tb-user-1 caption').html(user1.userName);
+                    $('#human-view #div-user-1 .user-info .user-info-name').text(user1.userName);
+                    $('#human-view #div-user-1 .money .money-number').html(formatNumber(user1.money));
                     $('#human-view #tb-user-1 tbody').html(user1.tableHtml);
-                    $('#human-view #roomNumber span').html(roomId);
+                    $('#human-view #roomNumber #roomid').html(roomId);
 
-                    $('#human-view #tb-user-2 caption').html(user2.userName);
-                    $('#human-view #div-user-2 .money span').html(formatNumber(user2.money));
+                    //$('#human-view #tb-user-2 caption').html(user2.userName);
+                    $('#human-view #div-user-2 .user-info .user-info-name').text(user2.userName);
+                    $('#human-view #div-user-2 .money .money-number').html(formatNumber(user2.money));
                     $('#human-view #tb-user-2 tbody').html(user2.tableHtml);
 
-                    $('#human-view #btnStart').css('visibility','hidden');
+                    $('#human-view #btnStart').css('visibility', 'hidden');
                     setScreen(2, true);
+
                 } else {
-                    $('#human-view #tb-user-2 caption').html(user2.userName);
-                    $('#human-view #div-user-2 .money span').html(formatNumber(user2.money));
+                    //$('#human-view #tb-user-2 caption').html(user2.userName);
+                    $('#human-view #div-user-2 .user-info .user-info-name').text(user2.userName);
+                    $('#human-view #div-user-2 .money .money-number').html(formatNumber(user2.money));
                     $('#human-view #tb-user-2 tbody').html(user2.tableHtml);
                     buttonStartOff(false);
                 }
 
-
-                
             });
 
             conn.on('overflowMember', function () {
                 $('#messageHub').html('Phòng chơi đã đầy người.');
             });
-                
+
             conn.on('userNameExists', function () {
                 $('#messageHub').html('Tên người chơi đã tồn tại.');
             });
@@ -208,31 +236,96 @@
                 $('#messageHub').html('Phòng không tồn tại.');
             });
 
+            conn.on('onUserPlayGame', function (arr) {
+                GameStatus.isOn = true;
+                $('#human-view .row-innit').html('');
+                var shuffle = Array.from(arr);
+                var y = 0;
+                var leftRow = $('#human-view .row-dot').position().left;
+                var rightRow = leftRow + $('#human-view .row-dot').width();
+                const timeout = 300;
+
+                showNumberInterval = setInterval(() => {
+                    var value = shuffle[y++];
+                    GameStatus.arrayHost.push(value);
+                    var elem = createElement(value);
+                    $('#human-view .row-dot').html(elem);
+
+                    elem.animate({
+                        left: rightRow
+                    }, timeout, function () {
+                        addToRowInit(value);
+                    });
+
+                    if (y == shuffle.length) {
+                        clearGame(showNumberInterval);
+                        //conn.invoke("UserRePlayGame").catch(function (err) {
+                        //    return console.error(err.toString());
+                        //});
+                    };
+
+                }, timeout);
+            });
+
+            conn.on('onUserPlayNewGame', function (user1, user2) {
+
+                $('#human-view #div-user-1 .money .money-number').html(formatNumber(user1.money));
+                $('#human-view #tb-user-1 tbody').html(user1.tableHtml);
+
+                $('#human-view #div-user-2 .money .money-number').html(formatNumber(user2.money));
+                $('#human-view #tb-user-2 tbody').html(user2.tableHtml);
+            })
+
             conn.on('onUserOutRoom', function (userName) {
-                $('#human-view #tb-user-2 caption').html('Đang chờ người chơi');
-                $('#human-view #div-user-2 .money span').html('');
+
+                clearGame(showNumberInterval);
+                buttonStartOff(true);
+                $('#human-view #tb-user-1 tbody td').each(function (key, item) {
+                    $(item).find('img.pick-icon').remove();
+                });
+
+                $('#human-view #div-user-2 .user-info .user-info-name').text('Đang chờ người chơi');
+                //$('#human-view #tb-user-2 caption').html('Đang chờ người chơi');
+                $('#human-view #div-user-2 .money .money-number').html('');
                 $('#human-view #tb-user-2 tbody').html('');
+                // alert('Con đũy ' + userName + ' out rồi.');
+                var _message = new _MessageBox();
+                _message.setIcon('https://www.flaticon.com/svg/static/icons/svg/564/564619.svg');
+                _message.setButton('OK kệ nó');
+                _message.setTitle('Thông báo');
+                _message.setMessage('Người chơi ' + userName + ' đã rời khỏi phòng.');
+                _message.Show();
+
             });
 
             conn.on('onUserPickNumber', function (number) {
                 $.each($('#human-view #tb-user-2').find('td'), function (key, item) {
                     if (parseInt($(item).children('a').attr('data-type')) === number) {
-                        $(item).addClass('td-active');
+                        $(item).append(pickIcon);
                         return false;
                     }
                 })
             });
 
-            conn.on('onUserWin', function (userW,userL, user2) {
+            conn.on('onUserWin', function (userW, userL, user2) {
+
+                clearGame(showNumberInterval);
+             
                 if (user2) {
-                    alert('Con mắm ' + userW.userName + ' win ời.');
-                    $('#human-view #div-user-1 .money span').html(formatNumber(userL.money));
-                    $('#human-view #div-user-2 .money span').html(formatNumber(userW.money));
+                  //  alert('Con mắm ' + userW.userName + ' win ời.');
+                    var msb = new _MessageBox('Thông báo', 'https://www.flaticon.com/svg/static/icons/svg/189/189664.svg', 'Vl Sad Vậy', 'Thua rồi');
+                    msb.Show();
+
+                    $('#human-view #div-user-1 .money .money-number').html(formatNumber(userL.money));
+                    $('#human-view #div-user-2 .money .money-number').html(formatNumber(userW.money));
                 }
                 else {
-                    alert('Chúc mừng, win cmn ời.');
-                    $('#human-view #div-user-1 .money span').html(formatNumber(userW.money));
-                    $('#human-view #div-user-2 .money span').html(formatNumber(userL.money));
+                   /// alert('Chúc mừng, win cmn ời.');
+                    var msb = new _MessageBox('Thông báo', 'https://www.flaticon.com/svg/static/icons/svg/189/189664.svg', 'Ok Ngon Vl', 'Kinh rồi');
+                    msb.Show();
+
+                    $('#human-view #div-user-1 .money .money-number').html(formatNumber(userW.money));
+                    $('#human-view #div-user-2 .money .money-number').html(formatNumber(userL.money));
                 }
             });
         }
@@ -252,5 +345,49 @@
             }
             return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
         }
+
+
+        function clearGame(showNumberInt) {
+            clearInterval(showNumberInt);
+            GameStatus.isOn = false;
+            GameStatus.arrayHost.length = 0;
+        }
+
+        function addToRowInit(value) {
+            $('#human-view .row-innit').append(createElement(value));
+        }
+
+        function createElement(value) {
+            var elem = '<span class="dot dot-2">' + value + '</span>';
+            return $(elem);
+        }
+
+        var _MessageBox = function (tt,ic, bt, msg) {
+            this._icon = ic;
+            this._title = tt;
+            this._button = bt;
+            this._message = msg;
+            this.setTitle = function (tt) {
+                this._title = tt;
+            };
+            this.setButton = function (bt) {
+                this._button = bt;
+            };
+            this.setMessage = function (ms) {
+                this._message = ms;
+            };
+            this.setIcon = function (i) {
+                this._icon = i;
+            };
+            this.Show = function () {
+                $.MessageBox({
+                    title: this._title,
+                    message: '<img src="'+this._icon+'" height="20"/><span class="box-msg">' + this._message + '</span>',
+                    buttonDone: this._button
+                });
+            };
+        }
+
+
     </script>
 }
